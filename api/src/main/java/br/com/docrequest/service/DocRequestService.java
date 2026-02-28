@@ -42,7 +42,7 @@ public class DocRequestService {
     public DocRequestResponse create(DocRequestCreateRequest request) {
         String partId = TenantContext.getCurrentTenant();
         if (partId == null || partId.isBlank()) {
-            throw new IllegalStateException("Tenant context (partId) is not set. Ensure JWT contains tenant_id claim.");
+            throw new IllegalStateException("Tenant context (partId) is not set. Ensure JWT contains tenantId claim.");
         }
 
         // 1. Resolve active metadata template

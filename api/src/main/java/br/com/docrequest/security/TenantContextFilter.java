@@ -4,6 +4,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -19,9 +21,10 @@ import java.io.IOException;
  * and stores it in the TenantContext for the duration of the request.
  */
 @Component
+@Slf4j
 public class TenantContextFilter extends OncePerRequestFilter {
 
-    @Value("${app.security.tenant-claim:tenant_id}")
+    @Value("${app.security.tenant-claim:tenantId}")
     private String tenantClaim;
 
     @Override
@@ -29,9 +32,11 @@ public class TenantContextFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
+            log.info("TenantContextFilter : {}", request.getRequestURI());
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
                 String tenantId = jwt.getClaimAsString(tenantClaim);
+                log.info("Tenent Id from JWT : {}", tenantId);
                 if (tenantId != null && !tenantId.isBlank()) {
                     TenantContext.setCurrentTenant(tenantId);
                     MDC.put("partId", tenantId);

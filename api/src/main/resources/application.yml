@@ -73,8 +73,8 @@ minio:
 # ===== Application Custom Properties =====
 app:
   security:
-    tenant-claim: ${APP_TENANT_CLAIM:tenant_id}
-    roles-claim: ${APP_ROLES_CLAIM:realm_access.roles}
+    tenant-claim: ${APP_TENANT_CLAIM:tenantId}
+    roles-claim: ${APP_ROLES_CLAIM:roles}
   cache:
     domain-table-ttl-minutes: ${APP_CACHE_DOMAIN_TABLE_TTL:30}
     metadata-ttl-minutes: ${APP_CACHE_METADATA_TTL:15}

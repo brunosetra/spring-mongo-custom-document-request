@@ -1,0 +1,428 @@
+{
+  "id": "doc-request",
+  "realm": "doc-request",
+  "notBefore": 0,
+  "revokeRefreshToken": false,
+  "accessTokenLifespan": 300,
+  "accessTokenLifespanForImplicitFlow": 900,
+  "ssoSessionIdleTimeout": 900,
+  "ssoSessionMaxLifespan": 36000,
+  "offlineSessionIdleTimeout": 2592000,
+  "offlineSessionMaxLifespan": 5184000,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": true,
+  "bruteForceProtected": false,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 30,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginTheme": "keycloak",
+  "accountTheme": "keycloak",
+  "adminTheme": "keycloak",
+  "emailTheme": "keycloak",
+  "supportedLocales": [],
+  "browserSecurityHeaders": {
+    "contentSecurityPolicyReportOnly": false,
+    "contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
+    "xContentTypeOptions": "nosniff",
+    "xRobotsTag": "none",
+    "xFrameOptions": "SAMEORIGIN",
+    "xXSSProtection": "1; mode=block",
+    "strictTransportSecurity": "max-age=31536000; includeSubDomains"
+  },
+  "enabled": true,
+  "defaultSignatureAlgorithm": "RS256",
+  "users": [
+    {
+      "id": "admin-user-id",
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "System",
+      "lastName": "Administrator",
+      "email": "admin@docrequest.com",
+      "attributes": {
+        "tenantId": ["docrequest-tenant"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false,
+          "userLabel": "Admin Password"
+        }
+      ],
+      "realmRoles": [
+        "ADMIN",
+        "ROLE_DOC_REQUEST_CREATE",
+        "ROLE_DOC_REQUEST_READ",
+        "ROLE_METADATA_CREATE",
+        "ROLE_METADATA_READ",
+        "ROLE_METADATA_UPDATE",
+        "ROLE_METADATA_DELETE",
+        "ROLE_DOMAIN_TABLE_CREATE",
+        "ROLE_DOMAIN_TABLE_READ",
+        "ROLE_DOMAIN_TABLE_UPDATE",
+        "ROLE_DOMAIN_TABLE_DELETE",
+        "ROLE_FILE_DOWNLOAD"
+      ]
+    },
+    {
+      "id": "manager-user-id",
+      "username": "manager",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "System",
+      "lastName": "Manager",
+      "email": "manager@docrequest.com",
+      "attributes": {
+        "tenantId": ["docrequest-tenant"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "manager123",
+          "temporary": false,
+          "userLabel": "Manager Password"
+        }
+      ],
+      "realmRoles": [
+        "MANAGER",
+        "ROLE_DOMAIN_TABLE_CREATE",
+        "ROLE_DOMAIN_TABLE_READ",
+        "ROLE_DOMAIN_TABLE_UPDATE",
+        "ROLE_DOMAIN_TABLE_DELETE",
+        "ROLE_METADATA_CREATE",
+        "ROLE_METADATA_READ",
+        "ROLE_METADATA_UPDATE",
+        "ROLE_METADATA_DELETE"
+      ]
+    },
+    {
+      "id": "operator-user-id",
+      "username": "operator",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "System",
+      "lastName": "Operator",
+      "email": "operator@docrequest.com",
+      "attributes": {
+        "tenantId": ["docrequest-tenant"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "operator123",
+          "temporary": false,
+          "userLabel": "Operator Password"
+        }
+      ],
+      "realmRoles": [
+        "OPERATOR",
+        "ROLE_DOC_REQUEST_CREATE",
+        "ROLE_DOC_REQUEST_READ",
+        "ROLE_FILE_DOWNLOAD"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "id": "role-doc-request-create",
+        "name": "ROLE_DOC_REQUEST_CREATE",
+        "description": "Create document requests",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-doc-request-read",
+        "name": "ROLE_DOC_REQUEST_READ",
+        "description": "Read document requests",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-metadata-create",
+        "name": "ROLE_METADATA_CREATE",
+        "description": "Create metadata templates",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-metadata-read",
+        "name": "ROLE_METADATA_READ",
+        "description": "Read metadata templates",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-metadata-update",
+        "name": "ROLE_METADATA_UPDATE",
+        "description": "Update metadata templates",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-metadata-delete",
+        "name": "ROLE_METADATA_DELETE",
+        "description": "Delete metadata templates",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-domain-table-create",
+        "name": "ROLE_DOMAIN_TABLE_CREATE",
+        "description": "Create domain tables",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-domain-table-read",
+        "name": "ROLE_DOMAIN_TABLE_READ",
+        "description": "Read domain tables",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-domain-table-update",
+        "name": "ROLE_DOMAIN_TABLE_UPDATE",
+        "description": "Update domain tables",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-domain-table-delete",
+        "name": "ROLE_DOMAIN_TABLE_DELETE",
+        "description": "Delete domain tables",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-file-download",
+        "name": "ROLE_FILE_DOWNLOAD",
+        "description": "Download files",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {}
+      },
+      {
+        "id": "role-admin",
+        "name": "ADMIN",
+        "description": "Administrator with all permissions",
+        "composite": true,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {},
+        "composites": {
+          "realm": [
+            "ROLE_DOC_REQUEST_CREATE",
+            "ROLE_DOC_REQUEST_READ",
+            "ROLE_METADATA_CREATE",
+            "ROLE_METADATA_READ",
+            "ROLE_METADATA_UPDATE",
+            "ROLE_METADATA_DELETE",
+            "ROLE_DOMAIN_TABLE_CREATE",
+            "ROLE_DOMAIN_TABLE_READ",
+            "ROLE_DOMAIN_TABLE_UPDATE",
+            "ROLE_DOMAIN_TABLE_DELETE",
+            "ROLE_FILE_DOWNLOAD"
+          ]
+        }
+      },
+      {
+        "id": "role-manager",
+        "name": "MANAGER",
+        "description": "Manager with domain table and metadata permissions",
+        "composite": true,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {},
+        "composites": {
+          "realm": [
+            "ROLE_DOMAIN_TABLE_CREATE",
+            "ROLE_DOMAIN_TABLE_READ",
+            "ROLE_DOMAIN_TABLE_UPDATE",
+            "ROLE_DOMAIN_TABLE_DELETE",
+            "ROLE_METADATA_CREATE",
+            "ROLE_METADATA_READ",
+            "ROLE_METADATA_UPDATE",
+            "ROLE_METADATA_DELETE"
+          ]
+        }
+      },
+      {
+        "id": "role-operator",
+        "name": "OPERATOR",
+        "description": "Operator with document request permissions",
+        "composite": true,
+        "clientRole": false,
+        "containerId": "doc-request",
+        "attributes": {},
+        "composites": {
+          "realm": [
+            "ROLE_DOC_REQUEST_CREATE",
+            "ROLE_DOC_REQUEST_READ",
+            "ROLE_FILE_DOWNLOAD"
+          ]
+        }
+      }
+    ]
+  },
+  "clientScopes": [
+    {
+      "id": "roles",
+      "name": "roles",
+      "description": "roles",
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "id": "roles-mapper",
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "user.attribute": "realmRoles",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String Array"
+          }
+        }
+      ]
+    },
+    {
+      "id": "tenantId",
+      "name": "tenantId",
+      "description": "tenantId",
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "id": "tenantId-mapper",
+          "name": "tenantId",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "false",
+            "userinfo.token.claim": "true",
+            "user.attribute": "tenantId",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "tenantId",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "id": "doc-request-api",
+      "clientId": "doc-request-api",
+      "name": "Doc Request API",
+      "description": "API client for document request system",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "uqUpV9p66Rx9dTFKXwfDPT9IqJNoRfzY",
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "baseUrl": "http://localhost:8081",
+      "adminUrl": "*",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "frontchannelLogout": false,
+      "protocolMappers": [
+        {
+          "id": "client-roles-mapper",
+          "name": "roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "true",
+            "userinfo.token.claim": "true",
+            "user.attribute": "realmRoles",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "roles",
+            "jsonType.label": "String Array"
+          }
+        },
+        {
+          "id": "client-tenantId-mapper",
+          "name": "tenantId",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "multivalued": "false",
+            "userinfo.token.claim": "true",
+            "user.attribute": "tenantId",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "tenantId",
+            "jsonType.label": "String"
+          }
+        }
+      ],
+      "fullScopeAllowed": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "client.secret": "uqUpV9p66Rx9dTFKXwfDPT9IqJNoRfzY",
+        "client.secret.type": "secret"
+      },
+      "defaultClientScopes": ["web-origins", "roles", "tenantId"],
+      "optionalClientScopes": []
+    }
+  ],
+  "scopeMappings": [],
+  "defaultDefaultClientScopes": ["web-origins", "roles", "tenantId"],
+  "defaultOptionalClientScopes": [],
+  "attributes": {
+    "loginTheme": "keycloak",
+    "accountTheme": "keycloak",
+    "adminTheme": "keycloak",
+    "emailTheme": "keycloak"
+  }
+}
