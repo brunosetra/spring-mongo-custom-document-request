@@ -16,11 +16,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -88,6 +90,71 @@ public class DocRequestService {
         return docRequestRepository.findByUuidAndPartId(uuid, partId)
             .map(this::toResponse)
             .orElseThrow(() -> ResourceNotFoundException.of("DocRequest", uuid));
+    }
+
+    public DocRequestResponse findByUuidWithFiles(String uuid) {
+        String partId = TenantContext.getCurrentTenant();
+        DocRequest docRequest = docRequestRepository.findByUuidAndPartId(uuid, partId)
+            .orElseThrow(() -> ResourceNotFoundException.of("DocRequest", uuid));
+
+        // Get the metadata to identify file fields - use the exact version used when creating the DocRequest
+        DocRequestMetadata metadata = metadataService.findEntityByNameAndVersion(
+            docRequest.getDocRequestMetadataName(),
+            docRequest.getDocRequestMetadataVersion()
+        );
+        Map<String, DocRequestFieldType> fileFields = collectFileFields(metadata);
+
+        // Create a copy of fields to avoid modifying the original
+        Map<String, Object> fieldsWithFiles = new HashMap<>(docRequest.getFields());
+
+        // Download and convert files to Base64 in parallel
+        if (!fileFields.isEmpty()) {
+            Map<String, CompletableFuture<String>> downloadFutures = new HashMap<>();
+
+            // Submit all download tasks in parallel
+            for (Map.Entry<String, DocRequestFieldType> entry : fileFields.entrySet()) {
+                String fieldName = entry.getKey();
+                Object fieldValue = fieldsWithFiles.get(fieldName);
+
+                if (fieldValue != null) {
+                    String fileId = fieldValue.toString();
+                    downloadFutures.put(fieldName, CompletableFuture.supplyAsync(() -> {
+                        try {
+                            byte[] fileBytes = fileStorageService.downloadFile(partId, fileId);
+                            return Base64.getEncoder().encodeToString(fileBytes);
+                        } catch (Exception e) {
+                            log.error("Failed to download file for field '{}': {}", fieldName, e.getMessage());
+                            return null; // Return null on failure
+                        }
+                    }));
+                }
+            }
+
+            // Wait for all downloads to complete and update fields
+            downloadFutures.forEach((fieldName, future) -> {
+                try {
+                    String base64Content = future.get(); // This blocks until the future completes
+                    if (base64Content != null) {
+                        fieldsWithFiles.put(fieldName, base64Content);
+                        log.debug("Converted file for field '{}' to Base64", fieldName);
+                    }
+                    // If base64Content is null, keep the original fileId (download failed)
+                } catch (Exception e) {
+                    log.error("Error processing future for field '{}': {}", fieldName, e.getMessage());
+                    // Keep the original fileId if future processing fails
+                }
+            });
+        }
+
+        return DocRequestResponse.builder()
+            .uuid(docRequest.getUuid())
+            .partId(docRequest.getPartId())
+            .docRequestMetadataName(docRequest.getDocRequestMetadataName())
+            .docRequestMetadataVersion(docRequest.getDocRequestMetadataVersion())
+            .fields(fieldsWithFiles)
+            .createdAt(docRequest.getCreatedAt())
+            .updatedAt(docRequest.getUpdatedAt())
+            .build();
     }
 
     public Page<DocRequestResponse> findAll(Pageable pageable) {

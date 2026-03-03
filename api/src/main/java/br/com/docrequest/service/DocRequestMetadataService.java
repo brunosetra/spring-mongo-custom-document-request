@@ -105,6 +105,11 @@ public class DocRequestMetadataService {
             .orElseThrow(() -> ResourceNotFoundException.of("DocRequestMetadata (active)", name));
     }
 
+    public DocRequestMetadata findEntityByNameAndVersion(String name, int version) {
+        return metadataRepository.findByNameAndVersion(name, version)
+            .orElseThrow(() -> ResourceNotFoundException.of("DocRequestMetadata", name + " v" + version));
+    }
+
     @Cacheable(value = RedisConfig.CACHE_METADATA_VERSION, key = "#name + ':v:' + #version")
     public DocRequestMetadataResponse findByNameAndVersion(String name, int version) {
         return metadataRepository.findByNameAndVersion(name, version)

@@ -45,6 +45,13 @@ public class DocRequestController {
         return ResponseEntity.ok(docRequestService.findByUuid(uuid));
     }
 
+    @GetMapping("/{uuid}/with-files")
+    @PreAuthorize("hasRole('ROLE_DOC_REQUEST_READ')")
+    @Operation(summary = "Get a specific document request by UUID with files converted to Base64")
+    public ResponseEntity<DocRequestResponse> findByUuidWithFiles(@PathVariable String uuid) {
+        return ResponseEntity.ok(docRequestService.findByUuidWithFiles(uuid));
+    }
+
     @GetMapping("/search")
     @PreAuthorize("hasRole('ROLE_DOC_REQUEST_READ')")
     @Operation(summary = "Search document requests by metadata template name")
