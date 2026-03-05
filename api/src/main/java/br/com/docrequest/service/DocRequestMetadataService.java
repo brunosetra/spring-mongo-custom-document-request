@@ -8,6 +8,7 @@ import br.com.docrequest.dto.response.DocRequestMetadataResponse;
 import br.com.docrequest.exception.ResourceNotFoundException;
 import br.com.docrequest.mapper.DocRequestMetadataMapper;
 import br.com.docrequest.repository.jpa.DocRequestMetadataRepository;
+import br.com.docrequest.validation.metadata.DocRequestMetadataValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,6 +28,7 @@ public class DocRequestMetadataService {
 
     private final DocRequestMetadataRepository metadataRepository;
     private final DocRequestMetadataMapper metadataMapper;
+    private final DocRequestMetadataValidator metadataValidator;
 
     @Transactional
     @CacheEvict(value = RedisConfig.CACHE_METADATA_ACTIVE, key = "#request.name")
@@ -48,6 +50,9 @@ public class DocRequestMetadataService {
                 ? request.getFields().get(i).getFieldOrder() : i);
             metadata.getFields().add(field);
         }
+
+        // Validate metadata before saving
+        metadataValidator.validate(metadata);
 
         DocRequestMetadata saved = metadataRepository.save(metadata);
         log.info("Created DocRequestMetadata: {} v{}", saved.getName(), saved.getVersion());
@@ -87,6 +92,9 @@ public class DocRequestMetadataService {
                 ? request.getFields().get(i).getFieldOrder() : i);
             newVersion.getFields().add(field);
         }
+
+        // Validate metadata before saving
+        metadataValidator.validate(newVersion);
 
         DocRequestMetadata saved = metadataRepository.save(newVersion);
         log.info("Updated DocRequestMetadata: {} -> v{}", name, saved.getVersion());

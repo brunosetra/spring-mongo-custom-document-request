@@ -128,9 +128,10 @@ public class DocRequestValidationEngine {
 
     /**
      * Resolves a DOMAIN_CALCULATED field:
-     * 1. Gets the key value from the request
-     * 2. Looks up the row in the DomainTable
-     * 3. Applies the format expression against the row's columns
+     * 1. Extracts the domain field name from the format expression
+     * 2. Gets the key value from the referenced domain field
+     * 3. Looks up the row in the DomainTable
+     * 4. Applies the format expression against the row's columns
      */
     private Object resolveDomainCalculated(DocRequestFieldMetadata fieldMeta,
                                             Map<String, Object> requestFields,
@@ -141,8 +142,15 @@ public class DocRequestValidationEngine {
                 + "' has DOMAIN_CALCULATED inputType but no DomainTable name in defaultValue");
         }
 
-        // The key value should come from another field in the request
-        Object keyValue = requestFields.get(fieldMeta.getName());
+        // Extract the domain field name from the format expression
+        String domainFieldName = extractDomainFieldNameFromFormat(fieldMeta.getFormat());
+        if (domainFieldName == null) {
+            throw new IllegalStateException("Field '" + fieldMeta.getName()
+                + "' has DOMAIN_CALCULATED inputType but format does not contain a valid domain field reference");
+        }
+
+        // Get the key value from the referenced domain field
+        Object keyValue = requestFields.get(domainFieldName);
         if (keyValue == null) {
             return null;
         }
@@ -161,9 +169,8 @@ public class DocRequestValidationEngine {
             ));
         }
 
-        // Apply format expression using the row's column values
-        Map<String, Object> rowValues = new HashMap<>(matchingRow.get().getValues());
-        return resolveFormatExpression(fieldMeta.getFormat(), rowValues);
+        // Apply format expression by replacing domain field references with column values
+        return resolveDomainCalculatedFormat(fieldMeta.getFormat(), matchingRow.get().getValues());
     }
 
     /**
@@ -186,6 +193,60 @@ public class DocRequestValidationEngine {
         matcher.appendTail(result);
 
         return result.toString();
+    }
+
+    /**
+     * Extracts the domain field name from a format expression.
+     * Example: "${state_abbreviation.name} - ${state_abbreviation.region}" -> "state_abbreviation"
+     */
+    private String extractDomainFieldNameFromFormat(String format) {
+        if (format == null || format.isBlank()) {
+            return null;
+        }
+
+        Matcher matcher = FORMAT_EXPRESSION_PATTERN.matcher(format);
+        if (matcher.find()) {
+            String variableName = matcher.group(1);
+            // The variable name is in format "fieldname.column", extract just the fieldname
+            int dotIndex = variableName.indexOf('.');
+            if (dotIndex > 0) {
+                return variableName.substring(0, dotIndex);
+            }
+            return variableName;
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolves a DOMAIN_CALCULATED format expression by replacing domain field references
+     * with column values from the domain table row.
+     * Example: "${state_abbreviation.name} - ${state_abbreviation.region}" with row values
+     * {"name": "Rio de Janeiro", "region": "Sudeste"} -> "Rio de Janeiro - Sudeste"
+     */
+    private String resolveDomainCalculatedFormat(String format, Map<String, String> rowValues) {
+        if (format == null || format.isBlank()) {
+            return null;
+        }
+
+        String result = format;
+        Matcher matcher = FORMAT_EXPRESSION_PATTERN.matcher(format);
+
+        while (matcher.find()) {
+            String variableName = matcher.group(1);
+            // The variable name is in format "fieldname.column", extract just the column name
+            int dotIndex = variableName.indexOf('.');
+            String columnName = (dotIndex > 0) ? variableName.substring(dotIndex + 1) : variableName;
+
+            // Get the column value from the row
+            String columnValue = rowValues.get(columnName);
+            String replacement = (columnValue != null) ? columnValue : "";
+
+            // Replace all occurrences of this pattern
+            result = result.replace(matcher.group(), replacement);
+        }
+
+        return result;
     }
 
     /**

@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,6 +25,24 @@ public class GlobalExceptionHandler {
         log.warn("Validation failed: {} errors", ex.getErrors().size());
         return ResponseEntity.unprocessableEntity()
             .body(ApiErrorResponse.ofValidation(ex.getMessage(), request.getRequestURI(), ex.getErrors()));
+    }
+
+    @ExceptionHandler(InvalidDocRequestMetadataException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidDocRequestMetadataException(
+            InvalidDocRequestMetadataException ex, HttpServletRequest request) {
+        log.warn("DocRequestMetadata validation failed: {} errors", ex.getErrors().size());
+        
+        // Convert MetadataValidationError to FieldValidationError for API response
+        List<FieldValidationError> fieldErrors = ex.getErrors().stream()
+                .map(metaError -> FieldValidationError.of(
+                        metaError.getFieldName(),
+                        "ERR_METADATA_VALIDATION",
+                        metaError.getMessage(),
+                        null))
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.unprocessableEntity()
+            .body(ApiErrorResponse.ofValidation(ex.getMessage(), request.getRequestURI(), fieldErrors));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
