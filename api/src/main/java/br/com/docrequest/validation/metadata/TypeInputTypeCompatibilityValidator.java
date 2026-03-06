@@ -2,8 +2,6 @@ package br.com.docrequest.validation.metadata;
 
 import br.com.docrequest.domain.entity.DocRequestFieldMetadata;
 import br.com.docrequest.domain.entity.DocRequestMetadata;
-import br.com.docrequest.domain.enums.DocRequestFieldInputType;
-import br.com.docrequest.domain.enums.DocRequestFieldType;
 import br.com.docrequest.dto.response.MetadataValidationError;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;

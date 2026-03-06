@@ -3,7 +3,6 @@ package br.com.docrequest.validation.metadata;
 import br.com.docrequest.domain.entity.DocRequestFieldMetadata;
 import br.com.docrequest.domain.entity.DocRequestMetadata;
 import br.com.docrequest.domain.entity.DomainTable;
-import br.com.docrequest.domain.enums.DocRequestFieldInputType;
 import br.com.docrequest.repository.jpa.DomainTableRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,5 @@
 package br.com.docrequest.dto.request;
 
-import br.com.docrequest.domain.enums.SortDirection;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;

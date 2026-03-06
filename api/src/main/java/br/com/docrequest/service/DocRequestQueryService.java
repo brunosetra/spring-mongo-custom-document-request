@@ -7,12 +7,9 @@ import br.com.docrequest.dto.response.DocRequestResponse;
 import br.com.docrequest.dto.response.QueryPagination;
 import br.com.docrequest.dto.response.QueryResponse;
 import br.com.docrequest.exception.InvalidQueryException;
-import br.com.docrequest.mapper.DocRequestMetadataMapper;
 import br.com.docrequest.query.MongoQueryBuilder;
 import br.com.docrequest.query.ParsedQuery;
 import br.com.docrequest.query.QueryParser;
-import br.com.docrequest.repository.mongo.DocRequestRepository;
-import br.com.docrequest.security.TenantContext;
 import br.com.docrequest.util.DateFieldConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +36,6 @@ public class DocRequestQueryService {
     private final QueryParser queryParser;
     private final MongoQueryBuilder queryBuilder;
     private final MongoTemplate mongoTemplate;
-    private final DocRequestRepository docRequestRepository;
-    private final DocRequestMetadataMapper metadataMapper;
-    private final MetadataCacheService metadataCacheService;
     
     /**
      * Execute a query request and return paginated results.

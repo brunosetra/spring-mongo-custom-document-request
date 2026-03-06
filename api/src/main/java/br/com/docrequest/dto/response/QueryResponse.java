@@ -1,6 +1,5 @@
 package br.com.docrequest.dto.response;
 
-import br.com.docrequest.dto.response.DocRequestResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

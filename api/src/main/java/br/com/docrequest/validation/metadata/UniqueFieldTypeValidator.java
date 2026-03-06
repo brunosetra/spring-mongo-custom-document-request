@@ -1,6 +1,5 @@
 package br.com.docrequest.validation.metadata;
 
-import br.com.docrequest.domain.entity.DocRequestFieldMetadata;
 import br.com.docrequest.domain.entity.DocRequestMetadata;
 import br.com.docrequest.domain.enums.DocRequestFieldType;
 import br.com.docrequest.dto.response.MetadataValidationError;

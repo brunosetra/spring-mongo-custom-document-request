@@ -2,7 +2,6 @@ package br.com.docrequest.dto.request;
 
 import br.com.docrequest.domain.enums.ComparisonOperator;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

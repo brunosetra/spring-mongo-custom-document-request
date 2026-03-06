@@ -3,7 +3,6 @@ package br.com.docrequest.validation.validators;
 import br.com.docrequest.domain.entity.DocRequestFieldMetadata;
 import br.com.docrequest.domain.enums.DocRequestFieldType;
 import br.com.docrequest.dto.response.FieldValidationError;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;

@@ -1,6 +1,5 @@
 package br.com.docrequest.dto.request;
 
-import br.com.docrequest.domain.enums.LogicalOperator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

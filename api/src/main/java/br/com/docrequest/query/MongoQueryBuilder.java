@@ -1,8 +1,6 @@
 package br.com.docrequest.query;
 
-import br.com.docrequest.domain.enums.ComparisonOperator;
 import br.com.docrequest.domain.enums.DocRequestFieldType;
-import br.com.docrequest.domain.enums.LogicalOperator;
 import br.com.docrequest.domain.enums.SortDirection;
 import br.com.docrequest.security.TenantContext;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +10,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -25,9 +20,6 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class MongoQueryBuilder {
-    
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
-    private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
     
     /**
      * Build a MongoDB query from parsed query.
