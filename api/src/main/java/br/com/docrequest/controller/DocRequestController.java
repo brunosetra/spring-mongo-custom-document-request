@@ -1,8 +1,12 @@
 package br.com.docrequest.controller;
 
 import br.com.docrequest.dto.request.DocRequestCreateRequest;
+import br.com.docrequest.dto.request.QueryRequest;
 import br.com.docrequest.dto.response.DocRequestResponse;
+import br.com.docrequest.dto.response.QueryResponse;
+import br.com.docrequest.service.DocRequestQueryService;
 import br.com.docrequest.service.DocRequestService;
+import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -22,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 public class DocRequestController {
 
     private final DocRequestService docRequestService;
+    private final DocRequestQueryService docRequestQueryService;
 
     @PostMapping
     @PreAuthorize("hasRole('ROLE_DOC_REQUEST_CREATE')")
@@ -59,5 +64,12 @@ public class DocRequestController {
             @RequestParam String metadataName,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
         return ResponseEntity.ok(docRequestService.findByMetadataName(metadataName, pageable));
+    }
+    
+    @PostMapping("/querys")
+    @PreAuthorize("hasRole('ROLE_DOC_REQUEST_READ')")
+    @Operation(summary = "Execute advanced query on document requests")
+    public ResponseEntity<QueryResponse> query(@Valid @RequestBody QueryRequest request) {
+        return ResponseEntity.ok(docRequestQueryService.query(request));
     }
 }

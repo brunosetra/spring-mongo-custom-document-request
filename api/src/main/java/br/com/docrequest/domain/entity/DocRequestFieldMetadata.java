@@ -2,6 +2,7 @@ package br.com.docrequest.domain.entity;
 
 import br.com.docrequest.domain.enums.DocRequestFieldInputType;
 import br.com.docrequest.domain.enums.DocRequestFieldType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,6 +29,7 @@ public class DocRequestFieldMetadata implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doc_request_metadata_uuid", nullable = false,
         foreignKey = @ForeignKey(name = "fk_field_metadata_doc_request_metadata"))
+    @JsonBackReference
     private DocRequestMetadata docRequestMetadata;
 
     /**

@@ -118,3 +118,13 @@ logging:
     org.hibernate.SQL: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [%X{partId}] %logger{36} - %msg%n"
+docrequest:
+  query:
+    max-conditions: 50
+    max-depth: 5
+    max-search-term-length: 100
+    max-page-size: 100
+    default-page-size: 20
+    enable-query-metrics: true
+    enable-auto-indexing: false
+    index-creation-threshold: 1000

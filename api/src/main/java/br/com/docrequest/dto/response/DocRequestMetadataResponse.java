@@ -2,14 +2,18 @@ package br.com.docrequest.dto.response;
 
 import br.com.docrequest.domain.enums.DocRequestFieldInputType;
 import br.com.docrequest.domain.enums.DocRequestFieldType;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class DocRequestMetadataResponse {
 
     private String uuid;
@@ -24,6 +28,8 @@ public class DocRequestMetadataResponse {
 
     @Getter
     @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class FieldMetadataResponse {
         private String uuid;
         private String name;

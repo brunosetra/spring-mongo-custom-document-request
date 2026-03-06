@@ -1,5 +1,6 @@
 package br.com.docrequest.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -66,6 +67,7 @@ public class DocRequestMetadata implements Serializable {
     @OneToMany(mappedBy = "docRequestMetadata", cascade = CascadeType.ALL,
         orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("fieldOrder ASC")
+    @JsonManagedReference
     @Builder.Default
     private List<DocRequestFieldMetadata> fields = new ArrayList<>();
 

@@ -9,6 +9,7 @@ import br.com.docrequest.dto.response.DocRequestResponse;
 import br.com.docrequest.exception.ResourceNotFoundException;
 import br.com.docrequest.repository.mongo.DocRequestRepository;
 import br.com.docrequest.security.TenantContext;
+import br.com.docrequest.util.DateFieldConverter;
 import br.com.docrequest.validation.DocRequestValidationEngine;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,20 +70,23 @@ public class DocRequestService {
             fileStorageService.processFileFields(docRequestUuid, partId, resolvedFields, fileFields);
         }
 
-        // 5. Save DocRequest to MongoDB
+        // 5. Convert date fields from template format to ISO format for MongoDB storage
+        Map<String, Object> fieldsForStorage = DateFieldConverter.convertToIsoFormat(resolvedFields, metadata);
+
+        // 6. Save DocRequest to MongoDB
         DocRequest docRequest = DocRequest.builder()
             .uuid(docRequestUuid)
             .partId(partId)
             .docRequestMetadataName(metadata.getName())
             .docRequestMetadataVersion(metadata.getVersion())
-            .fields(resolvedFields)
+            .fields(fieldsForStorage)
             .build();
 
         DocRequest saved = docRequestRepository.save(docRequest);
         log.info("Created DocRequest: {} for tenant: {} using template: {} v{}",
             saved.getUuid(), partId, metadata.getName(), metadata.getVersion());
 
-        return toResponse(saved);
+        return toResponse(saved, metadata);
     }
 
     public DocRequestResponse findByUuid(String uuid) {
@@ -146,12 +150,18 @@ public class DocRequestService {
             });
         }
 
+        // Convert date fields from ISO format to template format
+        Map<String, Object> fieldsForResponse = DateFieldConverter.convertToTemplateFormat(
+            fieldsWithFiles, 
+            metadata
+        );
+
         return DocRequestResponse.builder()
             .uuid(docRequest.getUuid())
             .partId(docRequest.getPartId())
             .docRequestMetadataName(docRequest.getDocRequestMetadataName())
             .docRequestMetadataVersion(docRequest.getDocRequestMetadataVersion())
-            .fields(fieldsWithFiles)
+            .fields(fieldsForResponse)
             .createdAt(docRequest.getCreatedAt())
             .updatedAt(docRequest.getUpdatedAt())
             .build();
@@ -180,12 +190,27 @@ public class DocRequestService {
     }
 
     private DocRequestResponse toResponse(DocRequest docRequest) {
+        // For list methods, we need to fetch the metadata
+        DocRequestMetadata metadata = metadataService.findEntityByNameAndVersion(
+            docRequest.getDocRequestMetadataName(),
+            docRequest.getDocRequestMetadataVersion()
+        );
+        return toResponse(docRequest, metadata);
+    }
+
+    private DocRequestResponse toResponse(DocRequest docRequest, DocRequestMetadata metadata) {
+        // Convert date fields from ISO format to template format
+        Map<String, Object> fieldsForResponse = DateFieldConverter.convertToTemplateFormat(
+            docRequest.getFields(), 
+            metadata
+        );
+        
         return DocRequestResponse.builder()
             .uuid(docRequest.getUuid())
             .partId(docRequest.getPartId())
             .docRequestMetadataName(docRequest.getDocRequestMetadataName())
             .docRequestMetadataVersion(docRequest.getDocRequestMetadataVersion())
-            .fields(docRequest.getFields())
+            .fields(fieldsForResponse)
             .createdAt(docRequest.getCreatedAt())
             .updatedAt(docRequest.getUpdatedAt())
             .build();
