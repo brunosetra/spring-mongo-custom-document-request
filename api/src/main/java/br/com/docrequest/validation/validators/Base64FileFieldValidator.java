@@ -4,6 +4,8 @@ import br.com.docrequest.domain.entity.DocRequestFieldMetadata;
 import br.com.docrequest.domain.enums.DocRequestFieldType;
 import br.com.docrequest.dto.response.FieldValidationError;
 import br.com.docrequest.validation.AbstractFieldValidator;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,7 @@ import java.util.Optional;
  * Validates generic Base64-encoded file content.
  */
 @Component
+@Slf4j
 public class Base64FileFieldValidator extends AbstractFieldValidator {
 
     @Value("${app.file.max-size-mb:10}")

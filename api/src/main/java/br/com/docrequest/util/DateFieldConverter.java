@@ -3,12 +3,14 @@ package br.com.docrequest.util;
 import br.com.docrequest.domain.entity.DocRequestFieldMetadata;
 import br.com.docrequest.domain.entity.DocRequestMetadata;
 import br.com.docrequest.domain.enums.DocRequestFieldType;
+import br.com.docrequest.exception.ConversionException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -39,10 +41,11 @@ public final class DateFieldConverter {
      * @param fields The input fields map with dates in template format
      * @param metadata The DocRequestMetadata containing field format definitions
      * @return New map with date fields converted to ISO format
+     * @throws ConversionException when date conversion fails
      */
     public static Map<String, Object> convertToIsoFormat(
             Map<String, Object> fields, 
-            DocRequestMetadata metadata) {
+            DocRequestMetadata metadata) throws ConversionException {
         
         if (fields == null || fields.isEmpty() || metadata == null) {
             return fields;
@@ -58,11 +61,9 @@ public final class DateFieldConverter {
 
             if (value != null && value instanceof String) {
                 String isoValue = convertToIso((String) value, formatInfo);
-                if (isoValue != null) {
-                    convertedFields.put(fieldName, isoValue);
-                    log.debug("Converted field '{}' from '{}' to ISO format '{}'", 
-                        fieldName, value, isoValue);
-                }
+                convertedFields.put(fieldName, isoValue);
+                log.debug("Converted field '{}' from '{}' to ISO format '{}'", 
+                    fieldName, value, isoValue);
             }
         }
 
@@ -75,10 +76,11 @@ public final class DateFieldConverter {
      * @param fields The fields map with dates in ISO format from MongoDB
      * @param metadata The DocRequestMetadata containing field format definitions
      * @return New map with date fields converted to template format
+     * @throws ConversionException when date conversion fails
      */
     public static Map<String, Object> convertToTemplateFormat(
             Map<String, Object> fields, 
-            DocRequestMetadata metadata) {
+            DocRequestMetadata metadata) throws ConversionException {
         
         if (fields == null || fields.isEmpty() || metadata == null) {
             return fields;
@@ -94,11 +96,9 @@ public final class DateFieldConverter {
 
             if (value != null) {
                 String templateValue = convertToTemplate(value, formatInfo);
-                if (templateValue != null) {
-                    convertedFields.put(fieldName, templateValue);
-                    log.debug("Converted field '{}' from '{}' to template format '{}'", 
-                        fieldName, value, templateValue);
-                }
+                convertedFields.put(fieldName, templateValue);
+                log.debug("Converted field '{}' from '{}' to template format '{}'", 
+                    fieldName, value, templateValue);
             }
         }
 
@@ -133,15 +133,21 @@ public final class DateFieldConverter {
             if (formatInfo.fieldType() == DocRequestFieldType.DATE) {
                 LocalDate date = LocalDate.parse(value, templateFormatter);
                 return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            } else if (formatInfo.fieldType() == DocRequestFieldType.EXPIRATION_DATE) {
+                LocalDate date = LocalDate.parse(value, templateFormatter);
+                return date.format(DateTimeFormatter.ISO_LOCAL_DATE);
             } else {
-                // DATETIME or EXPIRATION_DATE
+                // DATETIME
                 LocalDateTime dateTime = LocalDateTime.parse(value, templateFormatter);
                 return dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
             }
         } catch (DateTimeParseException e) {
-            log.warn("Failed to convert date '{}' with format '{}': {}", 
+            log.error("Failed to convert date '{}' with format '{}': {}", 
                 value, formatInfo.format(), e.getMessage());
-            return null;
+            throw new ConversionException("field", value, formatInfo.format(), 
+                formatInfo.fieldType() == DocRequestFieldType.DATE ? "ISO_LOCAL_DATE" : 
+                formatInfo.fieldType() == DocRequestFieldType.EXPIRATION_DATE ? "ISO_LOCAL_DATE" : "ISO_LOCAL_DATE_TIME",
+                e.getMessage(), e);
         }
     }
 
@@ -157,23 +163,40 @@ public final class DateFieldConverter {
                 if (value instanceof String) {
                     date = LocalDate.parse((String) value, DateTimeFormatter.ISO_LOCAL_DATE);
                 } else {
-                    return null;
+                    throw new ConversionException("field", value.toString(), 
+                        value.getClass().getSimpleName(), formatInfo.format(),
+                        "Invalid value type for DATE field, expected String");
+                }
+                return date.format(templateFormatter);
+            } else if (formatInfo.fieldType() == DocRequestFieldType.EXPIRATION_DATE) {
+                LocalDate date;
+                if (value instanceof String) {
+                    date = LocalDate.parse((String) value, DateTimeFormatter.ISO_LOCAL_DATE);
+                } else {
+                    throw new ConversionException("field", value.toString(), 
+                        value.getClass().getSimpleName(), formatInfo.format(),
+                        "Invalid value type for EXPIRATION_DATE field, expected String");
                 }
                 return date.format(templateFormatter);
             } else {
-                // DATETIME or EXPIRATION_DATE
+                // DATETIME
                 LocalDateTime dateTime;
                 if (value instanceof String) {
                     dateTime = LocalDateTime.parse((String) value, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                 } else {
-                    return null;
+                    throw new ConversionException("field", value.toString(), 
+                        value.getClass().getSimpleName(), formatInfo.format(),
+                        "Invalid value type for DATETIME field, expected String");
                 }
                 return dateTime.format(templateFormatter);
             }
         } catch (DateTimeParseException e) {
-            log.warn("Failed to convert date '{}' to template format '{}': {}", 
+            log.error("Failed to convert date '{}' to template format '{}': {}", 
                 value, formatInfo.format(), e.getMessage());
-            return null;
+            throw new ConversionException("field", value.toString(), 
+                formatInfo.fieldType() == DocRequestFieldType.DATE ? "ISO_LOCAL_DATE" : 
+                formatInfo.fieldType() == DocRequestFieldType.EXPIRATION_DATE ? "ISO_LOCAL_DATE" : "ISO_LOCAL_DATE_TIME",
+                formatInfo.format(), e.getMessage(), e);
         }
     }
 

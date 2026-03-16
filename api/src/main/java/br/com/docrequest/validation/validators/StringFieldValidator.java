@@ -19,7 +19,7 @@ public class StringFieldValidator extends AbstractFieldValidator {
     @Override
     protected Optional<FieldValidationError> validateValue(String fieldName, Object value,
                                                             DocRequestFieldMetadata metadata) {
-        String strValue = value.toString();
+        String strValue = value.toString().trim();
 
         if (metadata.getMin() != null && strValue.length() < metadata.getMin()) {
             return Optional.of(buildError(fieldName, metadata, "ERR_STRING_MIN_LENGTH",
