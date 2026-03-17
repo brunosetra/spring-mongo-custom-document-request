@@ -106,4 +106,12 @@ public class DocRequestFieldMetadata implements Serializable {
     @Column(name = "field_order", nullable = false)
     @Builder.Default
     private int fieldOrder = 0;
+
+    /**
+     * Whether this field must have a unique value across all documents
+     * using the same template within the same tenant.
+     */
+    @Column(name = "is_unique", nullable = false)
+    @Builder.Default
+    private boolean unique = false;
 }

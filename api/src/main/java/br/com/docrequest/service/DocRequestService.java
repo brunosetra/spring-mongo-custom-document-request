@@ -55,7 +55,7 @@ public class DocRequestService {
             throw new IllegalStateException("DocRequestMetadata '" + request.getMetadataName() + "' is disabled");
         }
 
-        // 2. Validate and resolve all fields
+        // 2. Validate and resolve all fields (includes unique field validation)
         Map<String, Object> resolvedFields = validationEngine.validateAndResolve(request.getFields(), metadata);
 
         // 3. Optional external validation
@@ -188,6 +188,8 @@ public class DocRequestService {
         }
         return fileFields;
     }
+
+    
 
     private DocRequestResponse toResponse(DocRequest docRequest) {
         // For list methods, we need to fetch the metadata

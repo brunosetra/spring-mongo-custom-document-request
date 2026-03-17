@@ -42,6 +42,7 @@ public class DocRequestMetadataResponse {
         private Integer max;
         private boolean required;
         private boolean editable;
+        private boolean unique;
         private String errorCodeReference;
         private int fieldOrder;
     }

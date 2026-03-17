@@ -22,12 +22,14 @@ public interface DocRequestMetadataMapper {
     DocRequestMetadata toEntity(DocRequestMetadataCreateRequest request);
 
     @Mapping(target = "uuid", ignore = true)
-    @Mapping(target = "docRequestMetadata", ignore = true)
-    DocRequestFieldMetadata toFieldEntity(DocRequestFieldMetadataRequest request);
+@Mapping(target = "docRequestMetadata", ignore = true)
+@Mapping(target = "unique", source = "unique")
+DocRequestFieldMetadata toFieldEntity(DocRequestFieldMetadataRequest request);
 
     DocRequestMetadataResponse toResponse(DocRequestMetadata metadata);
 
     @Mapping(target = "fieldOrder", source = "fieldOrder")
+    @Mapping(target = "unique", source = "unique")
     DocRequestMetadataResponse.FieldMetadataResponse toFieldResponse(DocRequestFieldMetadata field);
 
     List<DocRequestMetadataResponse.FieldMetadataResponse> toFieldResponseList(List<DocRequestFieldMetadata> fields);

@@ -6,10 +6,15 @@ import br.com.docrequest.domain.entity.DomainTable;
 import br.com.docrequest.domain.entity.DomainTableRow;
 import br.com.docrequest.domain.enums.DocRequestFieldInputType;
 import br.com.docrequest.dto.response.FieldValidationError;
+import br.com.docrequest.exception.UniqueFieldViolationException;
 import br.com.docrequest.exception.ValidationException;
+import br.com.docrequest.repository.mongo.DocRequestRepository;
 import br.com.docrequest.service.DomainTableService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -29,6 +34,8 @@ public class DocRequestValidationEngine {
 
     private final FieldValidatorFactory validatorFactory;
     private final DomainTableService domainTableService;
+    private final DocRequestRepository docRequestRepository;
+    private final MongoTemplate mongoTemplate;
 
     /**
      * Validates and resolves all fields in the request against the metadata template.
@@ -263,11 +270,77 @@ public class DocRequestValidationEngine {
             return Optional.empty();
         }
 
+        // Check unique field constraints
+        Optional<FieldValidationError> uniqueError = validateUniqueField(fieldMeta, value);
+        if (uniqueError.isPresent()) {
+            return uniqueError;
+        }
+
         if (validatorFactory.hasValidator(fieldMeta.getType())) {
             return validatorFactory.getValidator(fieldMeta.getType())
                 .validate(fieldMeta.getName(), value, fieldMeta);
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Validates unique field constraints by checking the database for existing values.
+     * This method is called during field validation to ensure uniqueness.
+     *
+     * @param fieldMeta the field metadata
+     * @param value the field value to validate
+     * @return Optional<FieldValidationError> if validation fails, empty otherwise
+     */
+    private Optional<FieldValidationError> validateUniqueField(DocRequestFieldMetadata fieldMeta, Object value) {
+        if (!fieldMeta.isUnique()) {
+            return Optional.empty();
+        }
+
+        try {
+            String partId = br.com.docrequest.security.TenantContext.getCurrentTenant();
+            String metadataName = fieldMeta.getDocRequestMetadata().getName();
+            
+            // Check if this value already exists for this template and tenant
+            boolean exists = checkUniqueFieldInDatabase(partId, metadataName, fieldMeta.getName(), value);
+            
+            if (exists) {
+                return Optional.of(FieldValidationError.of(
+                    fieldMeta.getName(),
+                    "ERR_UNIQUE_FIELD_VIOLATION",
+                    "Field '" + fieldMeta.getName() + "' must have a unique value. The value '" + value + "' already exists.",
+                    value
+                ));
+            }
+            
+            return Optional.empty();
+        } catch (Exception e) {
+            log.error("Error checking unique field validation for field '{}': {}", fieldMeta.getName(), e.getMessage());
+            return Optional.of(FieldValidationError.of(
+                fieldMeta.getName(),
+                "ERR_UNIQUE_FIELD_VALIDATION_FAILED",
+                "Error validating unique field '" + fieldMeta.getName() + "': " + e.getMessage()
+            ));
+        }
+    }
+
+    /**
+     * Checks if a unique field value exists in the database using MongoDB query.
+     * This method uses MongoDB query to search for documents containing the specified field value.
+     */
+    private boolean checkUniqueFieldInDatabase(String partId, String metadataName, String fieldName, Object value) {
+        // try {
+            Query query = new Query(Criteria.where("partId").is(partId)
+                .and("docRequestMetadataName").is(metadataName)
+                .and("fields." + fieldName).is(value));
+            
+            return mongoTemplate.exists(query, "doc_requests");
+        // } catch (Exception e) {
+        //     log.warn("MongoDB query failed, falling back to repository method for field '{}': {}", fieldName, e.getMessage());
+        //     // Fallback to repository method if MongoDB query fails
+        //     return docRequestRepository.existsByPartIdAndDocRequestMetadataNameAndFieldsContainingValue(
+        //         partId, metadataName, fieldName, value
+        //     );
+        // }
     }
 }

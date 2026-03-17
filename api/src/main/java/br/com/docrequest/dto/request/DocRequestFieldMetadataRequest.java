@@ -46,4 +46,6 @@ public class DocRequestFieldMetadataRequest {
 
     @Min(value = 0, message = "Field order must be non-negative")
     private int fieldOrder = 0;
+
+    private boolean unique = false;
 }
