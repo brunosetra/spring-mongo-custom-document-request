@@ -44,7 +44,14 @@ public enum DocRequestFieldInputType {
     /**
      * Value is set internally by the system. Not expected in the request payload.
      */
-    INTERNAL("Interno");
+    INTERNAL("Interno"),
+
+    /**
+     * Automatically generates incrementing integer values.
+     * The field must have type INTEGER.
+     * Values are unique within the same tenant and metadata template.
+     */
+    AUTO_INC("Auto Incremento");
 
     public final String description;
 

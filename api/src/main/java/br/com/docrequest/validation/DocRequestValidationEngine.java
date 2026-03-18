@@ -10,8 +10,10 @@ import br.com.docrequest.exception.UniqueFieldViolationException;
 import br.com.docrequest.exception.ValidationException;
 import br.com.docrequest.repository.mongo.DocRequestRepository;
 import br.com.docrequest.service.DomainTableService;
+import br.com.docrequest.validation.validators.AutoIncrementFieldValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -36,6 +38,7 @@ public class DocRequestValidationEngine {
     private final DomainTableService domainTableService;
     private final DocRequestRepository docRequestRepository;
     private final MongoTemplate mongoTemplate;
+    private final AutoIncrementFieldValidator autoIncrementFieldValidator;
 
     /**
      * Validates and resolves all fields in the request against the metadata template.
@@ -104,6 +107,11 @@ public class DocRequestValidationEngine {
             }
 
             case DOMAIN_CALCULATED -> resolveDomainCalculated(fieldMeta, requestFields, resolvedFields);
+
+            case AUTO_INC -> {
+                Long autoIncrementValue = autoIncrementFieldValidator.generateAutoIncrementValue(fieldMeta);
+                yield autoIncrementValue.intValue(); // Return as Integer to match INTEGER type
+            }
 
             case INTERNAL -> null; // Set by system, not from request
         };
