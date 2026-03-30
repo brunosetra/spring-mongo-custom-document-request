@@ -114,4 +114,25 @@ public class DocRequestFieldMetadata implements Serializable {
     @Column(name = "is_unique", nullable = false)
     @Builder.Default
     private boolean unique = false;
+
+    /**
+     * SpEL expression for conditional validation rules.
+     * Example: "#this.length() > 5 && #otherField.length() < 20"
+     */
+    @Column(name = "validation_expression", length = 2000)
+    private String validationExpression;
+
+    /**
+     * SpEL expression for conditional field dependencies.
+     * Example: "#otherField == 'SPECIFIC_VALUE' ? #this != null : true"
+     */
+    @Column(name = "dependency_expression", length = 2000)
+    private String dependencyExpression;
+
+    /**
+     * Whether to enable SpEL validation for this field.
+     */
+    @Column(name = "enable_spel_validation", nullable = false)
+    @Builder.Default
+    private boolean enableSpelValidation = false;
 }

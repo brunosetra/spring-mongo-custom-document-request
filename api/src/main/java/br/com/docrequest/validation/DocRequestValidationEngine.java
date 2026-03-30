@@ -6,14 +6,12 @@ import br.com.docrequest.domain.entity.DomainTable;
 import br.com.docrequest.domain.entity.DomainTableRow;
 import br.com.docrequest.domain.enums.DocRequestFieldInputType;
 import br.com.docrequest.dto.response.FieldValidationError;
-import br.com.docrequest.exception.UniqueFieldViolationException;
 import br.com.docrequest.exception.ValidationException;
 import br.com.docrequest.repository.mongo.DocRequestRepository;
 import br.com.docrequest.service.DomainTableService;
 import br.com.docrequest.validation.validators.AutoIncrementFieldValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -36,9 +34,10 @@ public class DocRequestValidationEngine {
 
     private final FieldValidatorFactory validatorFactory;
     private final DomainTableService domainTableService;
-    private final DocRequestRepository docRequestRepository;
     private final MongoTemplate mongoTemplate;
     private final AutoIncrementFieldValidator autoIncrementFieldValidator;
+    private final SpelValidationEngine spelValidationEngine;
+    private final SecurityContextProvider securityContextProvider;
 
     /**
      * Validates and resolves all fields in the request against the metadata template.
@@ -284,12 +283,56 @@ public class DocRequestValidationEngine {
             return uniqueError;
         }
 
+        // Traditional type validation
         if (validatorFactory.hasValidator(fieldMeta.getType())) {
-            return validatorFactory.getValidator(fieldMeta.getType())
+            Optional<FieldValidationError> typeError = validatorFactory.getValidator(fieldMeta.getType())
                 .validate(fieldMeta.getName(), value, fieldMeta);
+            if (typeError.isPresent()) {
+                return typeError;
+            }
+        }
+
+        // SpEL-based validation
+        Optional<FieldValidationError> spelError = validateFieldWithSpel(fieldMeta, value);
+        if (spelError.isPresent()) {
+            return spelError;
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Validates a field value using SpEL expressions.
+     */
+    private Optional<FieldValidationError> validateFieldWithSpel(DocRequestFieldMetadata fieldMeta, Object value) {
+        if (!fieldMeta.isEnableSpelValidation()) {
+            return Optional.empty();
+        }
+
+        try {
+            // Get security context for enhanced validation
+            Map<String, Object> securityContext = securityContextProvider.getSecurityContext();
+            
+            // Get user ID from security context
+            String userId = (String) securityContext.get("userId");
+            
+            // Evaluate SpEL expressions
+            return spelValidationEngine.validateWithSpel(
+                fieldMeta, 
+                value, 
+                new HashMap<>(), // resolved fields (empty for now, could be enhanced)
+                fieldMeta.getDocRequestMetadata(),
+                userId,
+                securityContext
+            );
+        } catch (Exception e) {
+            log.error("Error during SpEL validation for field '{}': {}", fieldMeta.getName(), e.getMessage());
+            return Optional.of(FieldValidationError.of(
+                fieldMeta.getName(),
+                "ERR_SPEL_VALIDATION_ERROR",
+                "Error during SpEL validation for field '" + fieldMeta.getName() + "': " + e.getMessage()
+            ));
+        }
     }
 
     /**
