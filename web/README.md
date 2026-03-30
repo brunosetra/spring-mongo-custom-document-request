@@ -10,11 +10,26 @@ View your app in AI Studio: https://ai.studio/apps/d1e3477e-8511-4a10-bebd-18e23
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js, Keycloak server
 
 1. Install dependencies:
    `npm install`
+
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+
+3. Configure Keycloak:
+   - Set the following environment variables in [.env.local](.env.local):
+     ```
+     KEYCLOAK_URL=http://localhost:8080
+     KEYCLOAK_REALM=master
+     KEYCLOAK_CLIENT_ID=doc-request-app
+     ```
+   - Create a Keycloak client with the following settings:
+     - Client ID: `doc-request-app`
+     - Client Protocol: `openid-connect`
+     - Valid Redirect URIs: `http://localhost:3000/*`
+     - Valid Post Logout Redirect URIs: `http://localhost:3000/*`
+     - Access Type: `confidential` (or `public` for development)
+
+4. Run the app:
    `npm run dev`

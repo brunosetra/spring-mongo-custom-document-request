@@ -1,69 +1,16 @@
-import React, { useState } from "react";
-import { Mail, Lock, ArrowRight, ShieldCheck } from "lucide-react";
+import React from "react";
+import { ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { FormLayout } from "@/components/forms/FormLayout";
-import { FormField } from "@/components/forms/FormField";
 import { useNavigate } from "react-router-dom";
-import { useDebounce } from "@/hooks/useDebounce";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { toast } from "sonner";
+import { useKeycloak } from "@/contexts/KeycloakContext";
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {},
-  );
+  const { login, isLoading: keycloakLoading } = useKeycloak();
 
-  const debouncedEmail = useDebounce(email, 300);
-  const debouncedPassword = useDebounce(password, 300);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
-
-    // Simple validation
-    const newErrors: { email?: string; password?: string } = {};
-    if (!email) {
-      newErrors.email = "Email é obrigatório";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Email inválido";
-    }
-    if (!password) {
-      newErrors.password = "Senha é obrigatória";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      toast.success("Login realizado com sucesso!");
-      navigate("/dashboard");
-    } catch (error) {
-      toast.error("Erro ao fazer login. Tente novamente.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleForgotPassword = () => {
-    toast.info("Link de recuperação de senha enviado para seu email");
-  };
-
-  const handleRequestAccount = () => {
-    toast.info(
-      "Solicitação de conta enviada. Entre em contato com o administrador.",
-    );
+  const handleLogin = () => {
+    login();
   };
 
   return (
@@ -88,100 +35,23 @@ export default function Login() {
         <FormLayout
           title="Bem-vindo"
           subtitle="Acesse sua conta para gerenciar documentos"
-          footer={
-            <p className="text-center text-sm text-muted-foreground">
-              Não tem acesso?{" "}
-              <button
-                onClick={handleRequestAccount}
-                className="text-primary font-bold hover:underline"
-              >
-                Solicitar conta
-              </button>
-            </p>
-          }
         >
-          <form onSubmit={handleLogin} className="space-y-6">
-            <FormField
-              label="Email"
-              error={errors.email}
-              help="Digite seu email corporativo"
-              required
-            >
-              <Input
-                type="email"
-                placeholder="nome@empresa.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-              />
-            </FormField>
-
-            <FormField
-              label="Senha"
-              error={errors.password}
-              help="Digite sua senha de acesso"
-              required
-            >
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password" className="text-sm font-medium">
-                    Senha
-                  </Label>
-                  <button
-                    type="button"
-                    onClick={handleForgotPassword}
-                    className="text-sm text-primary font-bold hover:underline"
-                  >
-                    Esqueceu a senha?
-                  </button>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-            </FormField>
-
-            <Button
-              type="submit"
-              className="w-full py-4 gap-2"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <span>Entrando...</span>
-                </>
-              ) : (
-                <>
-                  <span>Entrar</span>
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          <div className="relative my-10">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="px-4 bg-background text-sm text-muted-foreground/60">
-                Ou continue com
-              </span>
-            </div>
-          </div>
-
           <Button
-            variant="outline"
+            onClick={handleLogin}
             className="w-full py-4 gap-3"
-            disabled={isLoading}
+            disabled={keycloakLoading}
           >
-            <ShieldCheck className="w-5 h-5 text-primary" />
-            <span>Keycloak SSO</span>
+            {keycloakLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Redirecionando para Keycloak...</span>
+              </>
+            ) : (
+              <>
+                <ShieldCheck className="w-5 h-5 text-primary" />
+                <span>Entrar com Keycloak SSO</span>
+              </>
+            )}
           </Button>
         </FormLayout>
 
