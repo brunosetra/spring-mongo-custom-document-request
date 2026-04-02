@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import keycloak, { keycloakConfig } from "@/lib/keycloak";
+import keycloak, { initializeKeycloak } from "@/lib/keycloak";
 
 interface KeycloakContextType {
   isAuthenticated: boolean;
@@ -7,7 +7,6 @@ interface KeycloakContextType {
   user: any;
   login: () => void;
   logout: () => void;
-  keycloak: any;
 }
 
 const KeycloakContext = createContext<KeycloakContextType | undefined>(
@@ -24,17 +23,14 @@ export const KeycloakProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const initKeycloak = async () => {
       try {
-        const authenticated = await keycloak.init({
-          onLoad: "check-sso",
-          silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
-          pkceMethod: "S256",
-        });
+        // Use the initialization function that handles the flag internally
+        await initializeKeycloak();
 
-        setIsAuthenticated(authenticated);
+        setIsAuthenticated(keycloak.authenticated);
         setUser(keycloak.tokenParsed);
         setIsLoading(false);
 
-        if (authenticated) {
+        if (keycloak.authenticated) {
           keycloak.onTokenExpired = () => {
             keycloak
               .updateToken(70)

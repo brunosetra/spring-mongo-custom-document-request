@@ -28,10 +28,7 @@ export const FormLayout = React.forwardRef<HTMLDivElement, FormLayoutProps>(
     return (
       <div
         ref={ref}
-        className={cn(
-          "flex items-center justify-center min-h-screen p-4",
-          className,
-        )}
+        className={cn("flex items-center justify-center p-4", className)}
       >
         <Card className={cn("w-full", sizeClasses[size])}>
           <CardHeader>
